@@ -362,12 +362,43 @@ func openConfigForm() {
 			return nil
 		}
 
-		if event.Key() == tcell.KeyTab {
-			if app.GetFocus() == configForm {
-				app.SetFocus(authPages)
-			} else {
-				app.SetFocus(configForm)
+		if event.Key() == tcell.KeyTab || event.Key() == tcell.KeyBacktab {
+			// Treat both columns as one cycle: connection settings, the visible
+			// mechanism's credentials, then the action buttons.
+			type focusTarget struct {
+				form  *XForm
+				index int
+				item  tview.Primitive
 			}
+			var targets []focusTarget
+			mechanism, _ := configForm.GetFormItemByLabel("Auth Type").(*tview.DropDown).GetCurrentOption()
+			for _, form := range []*XForm{configForm, mechForms[authMechanisms[mechanism].ID]} {
+				for i := 0; i < form.GetFormItemCount(); i++ {
+					targets = append(targets, focusTarget{form, i, form.GetFormItem(i)})
+				}
+			}
+			for i := 0; i < configForm.GetButtonCount(); i++ {
+				targets = append(targets, focusTarget{configForm, configForm.GetFormItemCount() + i, configForm.GetButton(i)})
+			}
+			current := 0
+			for i, target := range targets {
+				if target.item.HasFocus() {
+					current = i
+					if dropdown, ok := target.item.(*tview.DropDown); ok && dropdown.IsOpen() {
+						dropdown.InputHandler()(tcell.NewEventKey(tcell.KeyEscape, 0, tcell.ModNone), func(p tview.Primitive) {
+							app.SetFocus(p)
+						})
+					}
+					break
+				}
+			}
+			delta := 1
+			if event.Key() == tcell.KeyBacktab {
+				delta = -1
+			}
+			target := targets[(current+delta+len(targets))%len(targets)]
+			target.form.SetFocus(target.index)
+			app.SetFocus(target.form)
 			return nil
 		}
 		return event
