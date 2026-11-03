@@ -13,14 +13,19 @@ func initHelpPage() {
 	helpText := `[blue]` + GodapVer
 
 	keybindings := [][]string{
-		{"Ctrl + Enter", "Global", "Next panel"},
+		{"H / L (Shift + h / l)", "Main pages", "Previous / next tab (wraps around)"},
+		{"Tab / Shift + Tab", "Main pages", "Cycle between panes"},
+		{"Ctrl + h / j / k / l", "Main pages", "Focus pane to the left / below / above / right"},
+		{"Backspace", "Input fields", "Delete character (if sent as Ctrl+h, it switches panes instead)"},
+		{"h / j / k / l", "Trees, tables and lists", "Navigate within the focused pane (h/l collapse/expand trees)"},
+		{"F2", "Main pages", "Change current server address & credentials"},
+		{"F3", "Main pages", "Show/hide headers"},
 		{"f", "Global", "Toggle attribute formatting"},
 		{"e", "Global", "Toggle emojis"},
 		{"c", "Global", "Toggle colors"},
 		{"a", "Global", "Toggle attribute expansion for multi-value attributes"},
 		{"d", "Global", "Toggle \"include deleted objects\" flag"},
 		{"s", "Global", "Toggle attribute sorting mode"},
-		{"l", "Global", "Change current server address & credentials"},
 		{"Ctrl + r", "Global", "Reconnect to the server"},
 		{"Ctrl + u", "Global", "Upgrade connection to use TLS (with StartTLS)"},
 		{"Ctrl + f", "Explorer & Object Search pages", "Open the finder to search for cached objects & attributes with regex"},
@@ -33,7 +38,7 @@ func initHelpPage() {
 		{"Ctrl + s", "Explorer panel", "Export all loaded nodes in the selected subtree into a JSON file"},
 		{"Ctrl + p", "Explorer panel", "Change the password of the selected user or computer account"},
 		{"Ctrl + a", "Explorer panel", "Update the userAccountControl of the object interactively"},
-		{"Ctrl + l", "Explorer panel", "Move the selected object to another location"},
+		{"Alt + m", "Explorer / Search results", "Move the selected object to another location"},
 		{"Delete", "Explorer panel", "Delete the selected object"},
 		{"Ctrl + e", "Attributes panel", "Edit the selected attribute of the selected object"},
 		{"Ctrl + n", "Attributes panel", "Create a new attribute in the selected object"},
@@ -45,7 +50,7 @@ func initHelpPage() {
 		{"Ctrl + g", "Groups panels / Explorer panel / Obj. Search panel", "Add a member to the selected group / add the selected object into a group"},
 		{"Ctrl + d", "Groups panels / Explorer panel / Obj. Search panel", "Inspect the DACL of the currently selected object"},
 		{"Ctrl + o", "DACL page", "Change the owner of the current security descriptor"},
-		{"Ctrl + k", "DACL page", "Change the control flags of the current security descriptor"},
+		{"Alt + k", "DACL page", "Change the control flags of the current security descriptor"},
 		{"Ctrl + s", "DACL page", "Export the current security descriptor into a JSON file"},
 		{"Ctrl + n", "DACL entries panel", "Create a new ACE in the current DACL"},
 		{"Ctrl + e", "DACL entries panel", "Edit the selected ACE of the current DACL"},
@@ -57,7 +62,6 @@ func initHelpPage() {
 		{"Ctrl + e", "DNS zones panel", "Edit the records of the currently selected node"},
 		{"Delete", "DNS zones panel", "Delete the selected DNS zone or DNS node"},
 		{"Delete", "Records Preview (in ADIDNS Node Editor)", "Delete the selected record of the ADIDNS node"},
-		{"h", "Global", "Show/hide headers"},
 		{"q", "Global", "Exit the program"},
 	}
 

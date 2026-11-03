@@ -590,9 +590,11 @@ func daclPageKeyHandler(event *tcell.EventKey) *tcell.EventKey {
 	case tcell.KeyCtrlO:
 		loadChangeOwnerForm()
 		return nil
-	case tcell.KeyCtrlK:
-		loadChangeControlFlagsForm()
-		return nil
+	case tcell.KeyRune:
+		if event.Rune() == 'k' && event.Modifiers() == tcell.ModAlt {
+			loadChangeControlFlagsForm()
+			return nil
+		}
 	case tcell.KeyCtrlS:
 		exportCurrentSD()
 		return nil

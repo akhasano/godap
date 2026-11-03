@@ -1,16 +1,15 @@
 <p align="center">
-  <h1 align="center"><b>godap</b></h1>
-  <p align="center"><i>A complete terminal user interface (TUI) for LDAP.</i></p>
+  <h1 align="center"><b>godap — Vim-like LDAP TUI</b></h1>
+  <p align="center"><i>Explore LDAP from the keyboard, not the mouse.</i></p>
   <p align="center">
-    <img src="https://img.shields.io/github/v/release/Macmod/godap" alt="GitHub Release">
-    <img src="https://img.shields.io/github/go-mod/go-version/Macmod/godap" alt="">
-    <img src="https://img.shields.io/github/languages/code-size/Macmod/godap" alt="">
-    <img src="https://img.shields.io/github/license/Macmod/godap" alt="">
-    <img src="https://img.shields.io/github/actions/workflow/status/Macmod/godap/release.yml" alt="">
-    <img src="https://img.shields.io/github/downloads/Macmod/godap/total" alt="GitHub Downloads">
-    <a href="https://twitter.com/MacmodSec"><img src="https://img.shields.io/twitter/follow/MacmodSec?style=for-the-badge&logo=X&color=blue" alt="Twitter Follow"></a>
+    <img src="https://img.shields.io/github/go-mod/go-version/akhasano/godap" alt="Go version">
+    <img src="https://img.shields.io/github/license/akhasano/godap" alt="License">
   </p>
 </p>
+
+This is a keyboard-first fork of [Macmod/godap](https://github.com/Macmod/godap). It keeps the upstream LDAP features and adds Vim-style navigation for everyday browsing. The goal is to move between objects, panels and tabs without repeatedly reaching for the mouse.
+
+Use `h/j/k/l` within trees and tables, `H/L` to switch tabs, and `Tab` or `Ctrl+h/j/k/l` to move between panels. Press `F2` for connection settings after the initial bind. The [keybindings](#keybindings) section covers the full mapping and changed shortcuts.
 
 ![Demo](images/godap.gif)
 
@@ -28,6 +27,7 @@
 
 # Features
 
+* Keyboard-first navigation across tabs, panels, trees and tables
 * 🧩 Supports authentication with password, NT hashes, Kerberos (CCACHE/password/NT hash/AES key/PKINIT) or PEM/PKCS#12 client certificate (SChannel)
 * 🗒️ Formats date/time, boolean and other categorical attributes into readable text
 * 😎 Pretty colors & cool emojis
@@ -48,10 +48,22 @@
 # Installation
 
 ```bash
-$ git clone https://github.com/Macmod/godap
+$ git clone https://github.com/akhasano/godap.git
 $ cd godap
 $ go install .
 ```
+
+To build binaries locally with Make:
+
+```bash
+make build                         # Current OS/architecture
+make build GOOS=linux GOARCH=arm64 # One cross-compiled target
+make build-all                     # Linux, macOS and Windows (x86/ARM variants)
+make test
+```
+
+Artifacts are written to `dist/godap-<os>-<arch>` (with `.exe` for Windows).
+Cross-compilation uses `CGO_ENABLED=0` and requires a POSIX shell to run the Makefile.
 
 ## Package Repositories
 
@@ -131,7 +143,7 @@ $ godap <hostname or IP>
 
 **Changing authentication at runtime**
 
-Every bind method above can also be selected and edited from inside godap: open the connection settings panel with `l`, pick a mechanism (`Simple Bind`, `NTLM`, `Kerberos` or `Certificate`) from the `Auth Type` dropdown, fill in whichever credential fields you want to use, and reconnect with the `Update` button. Each mechanism's page shows every credential it can use at once (e.g. the `Kerberos` page has fields for CCACHE, password, NT hash, AES key and a client certificate together) - godap picks the strongest one you've filled in, using the same precedence as the CLI flags (AES key > NT hash > password > CCACHE, with a client certificate taking priority for PKINIT).
+Every bind method above can also be selected and edited from inside godap: after the initial connection, open the connection settings panel with `F2` (previously `l`), pick a mechanism (`Simple Bind`, `NTLM`, `Kerberos` or `Certificate`) from the `Auth Type` dropdown, fill in whichever credential fields you want to use, and reconnect with the `Update` button. Each mechanism's page shows every credential it can use at once (e.g. the `Kerberos` page has fields for CCACHE, password, NT hash, AES key and a client certificate together) - godap picks the strongest one you've filled in, using the same precedence as the CLI flags (AES key > NT hash > password > CCACHE, with a client certificate taking priority for PKINIT). There is no login screen before the first connection; provide the initial credentials via CLI flags (use `--passfile -` to be prompted for a password).
 
 **LDAPS/StartTLS**
 
@@ -143,15 +155,15 @@ $ godap <hostname or IP> [bind flags] -S -I
 
 To use StartTLS to upgrade an existing connection to use TLS, use the `Ctrl + u` keybinding inside godap.
 
-Notice that, if the server certificate is not trusted by your client, you must either have started godap with `-I` to use the upgrade command properly or toggle the `IgnoreCert` checkbox using the `l` keybinding before upgrading.
+Notice that, if the server certificate is not trusted by your client, you must either have started godap with `-I` to use the upgrade command properly or toggle the `IgnoreCert` checkbox using `F2` before upgrading.
 
-If LDAPS is available, you can also change the port using `l`, toggle the LDAPS checkbox, set the desired value for `IgnoreCert`, and reconnect with `Ctrl + r`.
+If LDAPS is available, you can also change the port using `F2`, toggle the LDAPS checkbox, set the desired value for `IgnoreCert`, and reconnect with `Ctrl + r`.
 
 **SOCKS**
 
 To connect to LDAP through a SOCKS proxy include the flag `-x schema://ip:port`, where `schema` is one of `socks4`, `socks4a` or `socks5`.
 
-You can also change the address of your proxy using the `l` keybinding.
+You can also change the address of your proxy using `F2`.
 
 For more usage information & examples check the [Wiki](https://github.com/Macmod/godap/wiki)
 
@@ -197,15 +209,24 @@ For more usage information & examples check the [Wiki](https://github.com/Macmod
 
 ## Keybindings
 
+Keyboard navigation on the main pages: `Shift+h` / `Shift+l` switch tabs (wrapping at the ends); `Tab` / `Shift+Tab` cycle through panes; `Ctrl+h/j/k/l` focus the pane left/down/up/right. Within trees and tables, use `h/j/k/l` to navigate; `h`/`l` also collapse/expand nodes in the Explorer, Search Results and DNS trees. When typing in an input field, letters (including `H`/`L`) are inserted rather than used as navigation shortcuts. Some terminals send Backspace as `Ctrl+h`; in that case it will switch panes instead of deleting text.
+
+Changed shortcuts: connection settings (formerly `l`) are now `F2`; headers (formerly `h`) are now `F3`; moving an object (formerly `Ctrl+l`) is now `Alt+m`; DACL control flags (formerly `Ctrl+k`) are now `Alt+k`. `Ctrl+j` now moves focus down instead of switching tabs. These shortcuts apply to the main TUI, not modal forms or editors.
+
 | Keybinding                                          | Context                                                           | Action                                                                          |
 | --------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------|
-| <kbd>Ctrl</kbd> + <kbd>Enter</kbd> (or <kbd>Ctrl</kbd> + <kbd>J</kbd>) | Global                                         | Next panel                                                                      |
+| <kbd>Shift</kbd> + <kbd>h</kbd> / <kbd>Shift</kbd> + <kbd>l</kbd> | Main pages | Previous / next tab (wraps around) |
+| <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd> | Main pages | Cycle between panes |
+| <kbd>Ctrl</kbd> + <kbd>h</kbd> / <kbd>j</kbd> / <kbd>k</kbd> / <kbd>l</kbd> | Main pages | Focus pane left / down / up / right |
+| <kbd>h</kbd> / <kbd>j</kbd> / <kbd>k</kbd> / <kbd>l</kbd> | Trees and tables | Navigate within the focused pane; h/l collapse/expand nodes in supported trees |
+| <kbd>F2</kbd> | Main pages | Open connection and authentication settings (after connecting) |
+| <kbd>F3</kbd> | Main pages | Show/hide headers |
 | <kbd>f</kbd>                                        | Global                                                            | Toggle attribute formatting                                                     |
 | <kbd>e</kbd>                                        | Global                                                            | Toggle emojis                                                                   |
 | <kbd>c</kbd>                                        | Global                                                            | Toggle colors                                                                   |
 | <kbd>a</kbd>                                        | Global                                                            | Toggle attribute expansion for multi-value attributes                           |
 | <kbd>d</kbd>                                        | Global                                                            | Toggle "include deleted objects" flag                                           |
-| <kbd>l</kbd>                                        | Global                                                            | Change current server address & credentials                                     |
+| <kbd>s</kbd>                                        | Global                                                            | Cycle attribute sorting mode                                                    |
 | <kbd>Ctrl</kbd> + <kbd>r</kbd>                      | Global                                                            | Reconnect to the server                                                         |
 | <kbd>Ctrl</kbd> + <kbd>u</kbd>                      | Global                                                            | Upgrade connection to use TLS (with StartTLS)                                   |
 | <kbd>Ctrl</kbd> + <kbd>f</kbd>                      | Explorer & Search pages                                           | Open the finder to search for cached objects & attributes with regex            |
@@ -218,7 +239,7 @@ For more usage information & examples check the [Wiki](https://github.com/Macmod
 | <kbd>Ctrl</kbd> + <kbd>s</kbd>                      | Explorer panel                                                    | Export all loaded nodes in the selected subtree into a JSON file                |
 | <kbd>Ctrl</kbd> + <kbd>p</kbd>                      | Explorer panel                                                    | Change the password of the selected user or computer account (requires TLS)     |
 | <kbd>Ctrl</kbd> + <kbd>a</kbd>                      | Explorer panel                                                    | Update the userAccountControl of the object interactively                       |
-| <kbd>Ctrl</kbd> + <kbd>l</kbd>                      | Explorer panel                                                    | Move the selected object to another location                                    |
+| <kbd>Alt</kbd> + <kbd>m</kbd>                       | Explorer / Search results                                         | Move the selected object to another location                                    |
 | <kbd>Delete</kbd>                                   | Explorer panel                                                    | Delete the selected object                                                      |
 | <kbd>r</kbd>                                        | Attributes panel                                                  | Reload the attributes for the selected object                                   |
 | <kbd>Ctrl</kbd> + <kbd>e</kbd>                      | Attributes panel                                                  | Edit the selected attribute of the selected object                              |
@@ -231,7 +252,7 @@ For more usage information & examples check the [Wiki](https://github.com/Macmod
 | <kbd>Ctrl</kbd> + <kbd>g</kbd>                      | Groups panels / Explorer panel / Obj. Search panel                | Add a member to the selected group / add the selected object into a group       |
 | <kbd>Ctrl</kbd> + <kbd>d</kbd>                      | Groups panels / Explorer panel / Obj. Search panel                | Inspect the DACL of the currently selected object                               |
 | <kbd>Ctrl</kbd> + <kbd>o</kbd>                      | DACL page                                                         | Change the owner of the current security descriptor                             |
-| <kbd>Ctrl</kbd> + <kbd>k</kbd>                      | DACL page                                                         | Change the control flags of the current security descriptor                     |
+| <kbd>Alt</kbd> + <kbd>k</kbd>                       | DACL page                                                         | Change the control flags of the current security descriptor                     |
 | <kbd>Ctrl</kbd> + <kbd>s</kbd>                      | DACL page                                                         | Export the current security descriptor into a JSON file                         |
 | <kbd>Ctrl</kbd> + <kbd>n</kbd>                      | DACL entries panel                                                | Create a new ACE in the current DACL                                            |
 | <kbd>Ctrl</kbd> + <kbd>e</kbd>                      | DACL entries panel                                                | Edit the selected ACE of the current DACL                                       |
@@ -243,7 +264,6 @@ For more usage information & examples check the [Wiki](https://github.com/Macmod
 | <kbd>Ctrl</kbd> + <kbd>e</kbd>                      | DNS zones panel                                                   | Edit the records of the currently selected node                                 |
 | <kbd>Delete</kbd>                                   | DNS zones panel                                                   | Delete the selected DNS zone or DNS node                                        |
 | <kbd>Delete</kbd>                                   | Records Preview (in `Update ADIDNS Node`)                         | Delete the selected record of the ADIDNS node                                   |
-| <kbd>h</kbd>                                        | Global                                                            | Show/hide headers                                                               |
 | <kbd>q</kbd>                                        | Global                                                            | Exit the program                                                                |
 
 ## Tree Colors

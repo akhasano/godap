@@ -321,7 +321,10 @@ func initSearchPage() {
 			if currentNode.GetReference() != nil {
 				openPasswordChangeForm(currentNode)
 			}
-		case tcell.KeyCtrlL:
+		case tcell.KeyRune:
+			if event.Rune() != 'm' || event.Modifiers() != tcell.ModAlt {
+				break
+			}
 			if currentNode.GetReference() != nil {
 				openMoveObjectForm(currentNode, nil)
 			}

@@ -706,8 +706,8 @@ func dnsRotateFocus() {
 	case dnsNodeFilter:
 		app.SetFocus(dnsZoneFilter)
 	case dnsZoneFilter:
-		app.SetFocus(dnsZoneProps)
-	case dnsZoneProps:
+		app.SetFocus(visiblePane(dnsSidePanel))
+	case dnsZoneProps, dnsNodeRecords:
 		app.SetFocus(dnsTreePanel)
 	}
 }

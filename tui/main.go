@@ -377,6 +377,15 @@ func openConfigForm() {
 }
 
 func appPanelKeyHandler(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyF2 {
+		openConfigForm()
+		return nil
+	}
+	if event.Key() == tcell.KeyF3 {
+		toggleHeader()
+		return nil
+	}
+
 	_, isTextArea := app.GetFocus().(*tview.TextArea)
 	_, isInputField := app.GetFocus().(*tview.InputField)
 
@@ -395,14 +404,10 @@ func appPanelKeyHandler(event *tcell.EventKey) *tcell.EventKey {
 		toggleFlagA()
 	case 's', 'S':
 		toggleFlagS()
-	case 'h', 'H':
-		toggleHeader()
 	case 'd', 'D':
 		if lc.Flavor == ldaputils.MicrosoftADFlavor {
 			toggleFlagD()
 		}
-	case 'l', 'L':
-		openConfigForm()
 	}
 
 	switch event.Key() {
@@ -591,6 +596,20 @@ func setupLDAPConn() error {
 }
 
 func appKeyHandler(event *tcell.EventKey) *tcell.EventKey {
+	// The application capture also sees keys in modal forms and editors. Only
+	// navigate when the main page owns focus.
+	if appPanel == nil || !appPanel.HasFocus() {
+		return event
+	}
+
+	switch event.Key() {
+	case tcell.KeyCtrlH, tcell.KeyCtrlJ, tcell.KeyCtrlK, tcell.KeyCtrlL:
+		if target := directionalPane(app.GetFocus(), event.Key()); target != nil {
+			app.SetFocus(target)
+		}
+		return nil
+	}
+
 	_, isTextArea := app.GetFocus().(*tview.TextArea)
 	_, isInputField := app.GetFocus().(*tview.InputField)
 
@@ -598,10 +617,41 @@ func appKeyHandler(event *tcell.EventKey) *tcell.EventKey {
 		return event
 	}
 
-	if event.Key() == tcell.KeyCtrlJ {
-		dstPage := (page + 1) % pages.GetPageCount()
-		info.Highlight(strconv.Itoa(dstPage))
-		return nil
+	if event.Key() == tcell.KeyRune && event.Modifiers() == tcell.ModNone {
+		switch event.Rune() {
+		case 'H', 'L':
+			if pages.GetPageCount() > 0 {
+				delta := 1
+				if event.Rune() == 'H' {
+					delta = -1
+				}
+				info.Highlight(strconv.Itoa((page + delta + pages.GetPageCount()) % pages.GetPageCount()))
+			}
+			return nil
+		case 'h', 'l':
+			switch app.GetFocus().(type) {
+			case *tview.TreeView:
+				key := tcell.KeyLeft
+				if event.Rune() == 'l' {
+					key = tcell.KeyRight
+				}
+				return tcell.NewEventKey(key, 0, tcell.ModNone)
+			case *tview.List:
+				key := tcell.KeyLeft
+				if event.Rune() == 'l' {
+					key = tcell.KeyRight
+				}
+				return tcell.NewEventKey(key, 0, tcell.ModNone)
+			}
+		case 'j', 'k':
+			if _, ok := app.GetFocus().(*tview.List); ok {
+				key := tcell.KeyDown
+				if event.Rune() == 'k' {
+					key = tcell.KeyUp
+				}
+				return tcell.NewEventKey(key, 0, tcell.ModNone)
+			}
+		}
 	}
 
 	if event.Rune() == 'q' {
@@ -834,6 +884,10 @@ func handleLDAPError(err error) {
 }
 
 func setPageFocus() {
+	if lc.Flavor == ldaputils.BasicLDAPFlavor && page == 3 {
+		app.SetFocus(keybindingsPanel)
+		return
+	}
 	switch page {
 	case 0:
 		app.SetFocus(treePanel)

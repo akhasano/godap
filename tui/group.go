@@ -380,6 +380,8 @@ func groupRotateFocus() {
 	currentFocus := app.GetFocus()
 
 	switch currentFocus {
+	case depthInput:
+		app.SetFocus(groupNameInput)
 	case membersPanel:
 		app.SetFocus(groupNameInput)
 	case groupNameInput:
@@ -387,7 +389,11 @@ func groupRotateFocus() {
 	case objectNameInput:
 		app.SetFocus(groupsPanel)
 	case groupsPanel:
-		app.SetFocus(membersPanel)
+		if lc.Flavor == ldaputils.MicrosoftADFlavor {
+			app.SetFocus(depthInput)
+		} else {
+			app.SetFocus(membersPanel)
+		}
 	}
 }
 

@@ -637,7 +637,10 @@ func explorerPageKeyHandler(event *tcell.EventKey) *tcell.EventKey {
 	switch event.Key() {
 	case tcell.KeyCtrlP:
 		openPasswordChangeForm(currentNode)
-	case tcell.KeyCtrlL:
+	case tcell.KeyRune:
+		if event.Rune() != 'm' || event.Modifiers() != tcell.ModAlt {
+			break
+		}
 		openMoveObjectForm(currentNode, func(newObjectDN string) {
 			newParentNode := reloadParentNode(currentNode)
 
